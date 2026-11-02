@@ -40,6 +40,7 @@ All content lives in `js/data.js`:
 
 - **industries**: each has 3 clients, 5 `cases` (a problem, the user who feels it, and a matching success metric), and 3 industry constraints.
 - **js/interview.js**: the client's answers. For each industry: `volume`, `tools`, `signoff`, plus `today` and `tried` lists that line up with that industry's `cases` in order.
+- **js/guidance.js**: scenario guidance for each case, used by the AI role Hint button and the idea chips under "Say it in one sentence" (best-fit AI roles, a topic word, goal ideas, outcome ideas).
 - **globalConstraints**, **twists**, **curveballs**: used across every industry.
 - **aiRoles**: the eight capabilities from the workshop deck.
 
@@ -56,6 +57,7 @@ index.html     page structure
 css/style.css  look and feel
 js/data.js     industries, clients, problems, twists
 js/interview.js  the client's interview answers
+js/guidance.js   hints and idea chips for each case
 js/app.js      spinner, worksheet, brief generator, timer, pitch card
 .nojekyll      tells GitHub Pages to serve files as-is
 ```

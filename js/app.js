@@ -51,6 +51,7 @@
   let busy = false;
   let soundOn = store.get('cs:sound') === '1';
   let activeTab = 'kickoff';
+  let aiHintOn = false;
   const edits = {};         // manual edits to generated text, per tab
 
   const ind = () => D.industries[S.i.ind];
@@ -309,6 +310,7 @@
   ];
 
   function renderWork() {
+    aiHintOn = false;
     const host = $('#qgrid'); host.innerHTML = '';
     QS.forEach((q, idx) => {
       const d = document.createElement('div');
@@ -317,7 +319,7 @@
         '<div class="q-head"><span class="q-num"><span>' + (idx + 1) + '</span></span><div><div class="q-title">' + q.title + '</div><div class="q-ask">' + q.ask + '</div></div></div>' +
         '<p class="q-hint">' + esc(q.hint()) + '</p>' +
         (q.id === 'ai'
-          ? '<div class="roles"></div><div class="role-tip" hidden></div>'
+          ? '<div class="q-actions"><button class="btn small ghost" data-aihint="1">Hint</button></div><div class="role-hint" hidden></div><div class="roles"></div><div class="role-tip" hidden></div>'
           : '<textarea data-q="' + q.id + '" rows="4" placeholder="Rough notes are fine"></textarea>' +
             '<div class="q-actions"><button class="btn small ghost" data-seed="' + q.id + '">Start from the case</button></div>');
       host.appendChild(d);
@@ -348,13 +350,21 @@
   function refreshWork() {
     const assigned = MODES[S.mode].assign;
     const cur = aiRole();
-    $$('.role').forEach((b) => {
+    $$('#qgrid .role').forEach((b) => {
       const on = cur && D.aiRoles[Number(b.dataset.role)] === cur;
       b.setAttribute('aria-pressed', on ? 'true' : 'false');
       b.disabled = assigned;
     });
     const tip = $('.role-tip');
     if (tip) { tip.hidden = !cur; if (cur) tip.textContent = cur.tip; }
+    const hint = $('.role-hint');
+    if (hint) { hint.hidden = !aiHintOn; if (aiHintOn) hint.innerHTML = aiHintHtml(); }
+    const gd = guide();
+    $$('#qgrid .role').forEach((b) => {
+      const rk = D.aiRoles[Number(b.dataset.role)];
+      b.classList.toggle('hinted', !!(aiHintOn && gd && !MODES[S.mode].assign && rk && gd.r.indexOf(rk.key) >= 0));
+    });
+    renderGuidance();
     let done = 0;
     QS.forEach((q) => {
       const ok = q.id === 'ai' ? !!cur : ((W[q.id] || '').trim().length >= 3);
@@ -364,6 +374,48 @@
     $('#progFill').style.width = Math.round(done / QS.length * 100) + '%';
     $('#progText').textContent = done + ' of ' + QS.length + ' answered' + (done === QS.length ? ' ✨' : '');
     renderSentence();
+  }
+
+
+  /* ---------------- scenario guidance (hints + idea chips) ---------------- */
+  const ROLE_NOUN = { search: 'answer assistant', summarize: 'summarizer', extract: 'intake helper', classify: 'sorter', generate: 'drafter', recommend: 'advisor', automate: 'autopilot', agent: 'coordinator' };
+  const roleByKey = (k) => D.aiRoles.find((x) => x.key === k);
+  const art = (w) => (/^[aeiou]/i.test(w) ? 'an ' : 'a ') + w;
+  function guide() {
+    const g = (window.GUIDANCE || {})[ind().name];
+    return g ? g[S.i.problem] : null;
+  }
+  function aiHintHtml() {
+    const cur = aiRole(), g = guide();
+    if (MODES[S.mode].assign && cur) {
+      return 'Your assigned role is <b>' + esc(cur.name) + '</b>. Ask yourself: where in “' + esc(strip(text('problem'))) + '” could AI ' + esc(cur.verb) + '? ' + esc(cur.tip);
+    }
+    if (!g) return 'Look at the step in your Process answer that hurts most, then pick the capability that fixes that step.';
+    const a = roleByKey(g.r[0]), b = roleByKey(g.r[1]);
+    return 'Good fit for this case: <b>' + esc(a.name) + '</b>. ' + esc(g.w) + ' A second option to consider: <b>' + esc(b.name) + '</b>. You decide.';
+  }
+  function chipsFor(field) {
+    const g = guide(); if (!g) return [];
+    if (field === 'goal') return g.g;
+    if (field === 'outcome') return g.o;
+    const cur = aiRole();
+    const keys = []; if (cur) keys.push(cur.key);
+    g.r.forEach((k) => { if (!keys.includes(k)) keys.push(k); });
+    const out = keys.slice(0, 2).map((k) => art(g.t + ' ' + ROLE_NOUN[k]));
+    out.push('an AI ' + g.t + ' assistant');
+    return out;
+  }
+  function renderGuidance() {
+    [['cName', 'sName', 'name'], ['cGoal', 'sGoal', 'goal'], ['cOutcome', 'sOutcome', 'outcome']].forEach((p) => {
+      const host = $('#' + p[0]); host.innerHTML = '';
+      const list = chipsFor(p[2]);
+      if (list.length) { const lab = document.createElement('p'); lab.className = 'sf-help'; lab.textContent = 'Ideas from your case (click to use, then make it yours):'; host.appendChild(lab); }
+      list.forEach((t) => {
+        const b = document.createElement('button'); b.type = 'button'; b.dataset.fill = p[1]; b.dataset.val = t; b.textContent = t;
+        host.appendChild(b);
+      });
+    });
+    $('#hOutcome').textContent = 'Name the thing that gets better, as a noun phrase. The client wants: “' + strip(text('metric')) + '.”';
   }
 
   function sentenceParts() {
@@ -527,10 +579,10 @@
     if (notes.length) { L.push(''); L.push('NOTES FROM OUR WORKSHEET'); notes.forEach((n) => { L.push(n); L.push(''); }); L.pop(); }
     L.push('');
     L.push('HOW I WANT TO WORK');
-    L.push('1. Do not write any code yet. Ask me up to five questions to fill important gaps.');
+    L.push('1. Do not write any code yet. Ask me up to four questions to fill important gaps. If you use a question tool, ask them all in one batch of at most four.');
     L.push('2. After I answer, write a short build brief: objective, user workflow, three must-have features, assumptions, and how we will test it.');
     L.push('3. Then propose a plan in plain English with small milestones, and wait for my OK.');
-    L.push('4. Build one milestone at a time. After each one, tell me exactly what to click to test it, and commit it.');
+    L.push('4. Build one milestone at a time. After each one, tell me exactly what to click to test it, and save a backup copy of the working version (see CLAUDE.md).');
     return L.join('\n');
   }
 
@@ -555,9 +607,12 @@
     L.push('## Ground rules');
     L.push('- Explain every change in plain English after you make it.');
     L.push('- Ask before deleting or overwriting anything.');
-    L.push('- Use git. Commit after each working step with a clear message. If I say “roll back”, return to the last working commit.');
+    L.push('- Do not use git or GitHub. This folder is not a git repository and nothing needs to be pushed or published, so do not run git commands.');
+    L.push('- Keep simple backups instead: before a big change, copy the working files into a folder called backups (for example backups/step-2). If I say “roll back”, restore the most recent backup.');
     L.push('- Keep the scope small: aim for three must-have features. Tell me if I’m asking for too much for 45 minutes.');
     L.push('- Never ask me to paste API keys, passwords, or secrets.');
+    L.push('- This folder may start with only CLAUDE.md in it. That is expected, so there is no need to search for other files.');
+    L.push('- I might be on Windows or Mac. Prefer your file tools over shell commands, and avoid commands that only work on one system.');
     L.push('');
     L.push('## Technical rules');
     L.push('- Build a plain static web app: index.html, style.css, script.js. No frameworks, no build step, no npm install, no backend.');
@@ -791,10 +846,15 @@
         ta.value = q.seed(); W[q.id] = ta.value; saveW(); refreshWork(); updateBrief(); ta.focus();
         return;
       }
+      if (e.target.closest('[data-aihint]')) { aiHintOn = !aiHintOn; refreshWork(); return; }
       const role = e.target.closest('.role');
       if (role && !role.disabled) {
         const n = Number(role.dataset.role); W.ai = (W.ai === n) ? undefined : n; saveW(); refreshWork(); updateBrief();
       }
+    });
+    $('.sentence').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-fill]'); if (!b) return;
+      const id = b.dataset.fill; $('#' + id).value = b.dataset.val; W[id] = b.dataset.val; saveW(); renderSentence(); updateBrief(); $('#' + id).focus();
     });
     [['#sName', 'sName'], ['#sGoal', 'sGoal'], ['#sOutcome', 'sOutcome']].forEach((p) => {
       $(p[0]).addEventListener('input', (e) => { W[p[1]] = e.target.value; saveW(); renderSentence(); updateBrief(); });
