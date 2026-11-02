@@ -9,10 +9,11 @@ No API keys. No installs. No build step. It is plain HTML, CSS, and JavaScript.
 Open the page your facilitator shared, or download this repo and double-click `index.html`.
 
 1. **Spin** for a case. Lock the reels you like, re-roll the ones you don't.
-2. **Work the case**: answer the six questions and say your idea in one sentence.
-3. **Build brief**: download `CLAUDE.md`, put it in an empty folder, open Claude Code there, and paste the kickoff prompt.
-4. **Race the clock** with the sprint timer. A sealed curveball opens halfway through the 45-minute build.
-5. **Pitch**: download the pitch card for your share-out.
+2. **Interview the client**: ask up to 4 questions (what happens today, what they've tried, tools, sign-off, what a win looks like) and save useful answers to your worksheet.
+3. **Work the case**: answer the six questions and say your idea in one sentence.
+4. **Build brief**: download `CLAUDE.md`, put it in an empty folder, open Claude Code there, and paste the kickoff prompt.
+5. **Race the clock** with the sprint timer. A sealed curveball opens halfway through the 45-minute build.
+6. **Pitch**: download the pitch card for your share-out.
 
 Your answers are saved in your browser only. Nothing is sent anywhere.
 
@@ -38,6 +39,7 @@ Every case has its own link. The **Copy case link** button gives you a URL that 
 All content lives in `js/data.js`:
 
 - **industries**: each has 3 clients, 5 `cases` (a problem, the user who feels it, and a matching success metric), and 3 industry constraints.
+- **js/interview.js**: the client's answers. For each industry: `volume`, `tools`, `signoff`, plus `today` and `tried` lists that line up with that industry's `cases` in order.
 - **globalConstraints**, **twists**, **curveballs**: used across every industry.
 - **aiRoles**: the eight capabilities from the workshop deck.
 
@@ -52,7 +54,8 @@ Because the goal is that solutions open from a single HTML file with no keys, th
 ```
 index.html     page structure
 css/style.css  look and feel
-js/data.js     all the content you can edit
+js/data.js     industries, clients, problems, twists
+js/interview.js  the client's interview answers
 js/app.js      spinner, worksheet, brief generator, timer, pitch card
 .nojekyll      tells GitHub Pages to serve files as-is
 ```

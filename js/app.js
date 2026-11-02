@@ -207,6 +207,7 @@
     loadW();
     renderMemo(true);
     renderEnvelope();
+    renderInterview();
     renderWork();
     $('#caseNo').textContent = 'CASE #' + caseNumber();
     const st = $('#stamp'); st.classList.remove('slam'); void st.offsetWidth; st.classList.add('slam');
@@ -390,6 +391,90 @@
       f(p.goal, 'goal') + ' by using AI to ' + f(p.role, 'AI role') + ', improving ' + f(p.outcome, 'outcome') + '.';
   }
 
+  /* ---------------- client interview ---------------- */
+  const MAX_Q = 4;
+  const IV = [
+    { id: 'today',   q: 'What happens today?',            save: 'process' },
+    { id: 'tried',   q: 'What have you already tried?',   save: 'context' },
+    { id: 'volume',  q: 'How big is this problem?',       save: 'context' },
+    { id: 'tools',   q: 'What tools do you use now?',     save: 'context' },
+    { id: 'signoff', q: 'Who has to approve this?',       save: 'context' },
+    { id: 'win',     q: 'What does a win look like?',     save: 'outcome' }
+  ];
+  const contactName = () => D.contactFirst[S.i.fn] + ' ' + D.contactLast[S.i.ln];
+  function ivAnswer(id) {
+    if (id === 'win') return 'Simple: ' + lc(strip(text('metric'))) + '. And if I can see it working in a demo with realistic examples, I can sell it to my boss. Show me something I can click.';
+    const d = (window.INTERVIEW || {})[ind().name];
+    if (!d) return 'Good question. Honestly, we don’t have a clean answer. Use your best judgment and write it down as an assumption.';
+    return (id === 'today' || id === 'tried') ? d[id][S.i.problem] : d[id];
+  }
+  function ivFacts() {
+    return (W.asked || []).map((id) => ({ q: IV.find((x) => x.id === id).q, a: ivAnswer(id) }));
+  }
+  function ivBubble(id, fresh) {
+    const q = IV.find((x) => x.id === id);
+    const you = document.createElement('div'); you.className = 'iv-row you';
+    you.innerHTML = '<div class="iv-bub"><div class="iv-who">You</div>' + esc(q.q) + '</div>';
+    const row = document.createElement('div'); row.className = 'iv-row';
+    const initials = D.contactFirst[S.i.fn][0] + D.contactLast[S.i.ln][0];
+    const saved = !!(W.saved && W.saved[id]);
+    row.innerHTML = '<div class="iv-av" aria-hidden="true">' + esc(initials) + '</div><div class="iv-bub"><div class="iv-who">' + esc(contactName()) + '</div>' +
+      '<div class="iv-text"></div><button class="btn small ghost" data-save="' + id + '"' + (saved ? ' disabled' : '') + '>' + (saved ? 'Saved ✓' : 'Save to worksheet') + '</button></div>';
+    const log = $('#ivLog'); log.appendChild(you); log.appendChild(row);
+    const box = $('.iv-text', row); const ans = ivAnswer(id);
+    const btn = $('[data-save]', row);
+    if (fresh && !reduced) {
+      btn.hidden = true; box.innerHTML = '<span class="iv-dots"></span>';
+      setTimeout(() => {
+        box.textContent = ''; let n = 0;
+        const iv = setInterval(() => {
+          n += 2; box.textContent = ans.slice(0, n);
+          if (n % 12 === 0) beep(380 + rnd(60), 0.015, 'square', 0.015);
+          if (n >= ans.length) { clearInterval(iv); box.textContent = ans; btn.hidden = false; }
+        }, 16);
+      }, 450);
+    } else box.textContent = ans;
+  }
+  function renderInterview(freshId) {
+    const asked = W.asked || [];
+    const left = MAX_Q - asked.length;
+    $('#ivLeft').textContent = left > 0 ? left + ' question' + (left === 1 ? '' : 's') + ' left' : 'Out of time';
+    $('#ivSub').textContent = contactName() + ' has time for ' + MAX_Q + ' questions before their next meeting. Choose wisely, then save the useful answers to your worksheet.';
+    const chips = $('#ivChips'); chips.innerHTML = '';
+    IV.forEach((q) => {
+      const b = document.createElement('button');
+      b.className = 'role'; b.type = 'button'; b.dataset.iv = q.id; b.textContent = q.q;
+      const done = asked.includes(q.id);
+      b.setAttribute('aria-pressed', done ? 'true' : 'false');
+      b.disabled = done || left <= 0;
+      chips.appendChild(b);
+    });
+    $('#ivLog').innerHTML = '';
+    asked.forEach((id) => ivBubble(id, id === freshId));
+    if (left <= 0) {
+      const row = document.createElement('div'); row.className = 'iv-row';
+      row.innerHTML = '<div class="iv-av" aria-hidden="true">' + esc(D.contactFirst[S.i.fn][0] + D.contactLast[S.i.ln][0]) + '</div><div class="iv-bub"><div class="iv-who">' + esc(contactName()) + '</div>I have to run to another meeting. Anything you still don’t know, make a sensible assumption and tell me what it was.</div>';
+      $('#ivLog').appendChild(row);
+    }
+  }
+  function askClient(id) {
+    W.asked = W.asked || [];
+    if (W.asked.includes(id) || W.asked.length >= MAX_Q) return;
+    W.asked.push(id); saveW(); beep(520, 0.06, 'triangle', 0.07);
+    renderInterview(id); updateBrief();
+  }
+  function saveAnswer(id) {
+    const q = IV.find((x) => x.id === id);
+    const line = 'Client says: ' + ivAnswer(id);
+    W[q.save] = (W[q.save] ? W[q.save].trim() + '\n' : '') + line;
+    W.saved = W.saved || {}; W.saved[id] = true; saveW();
+    const ta = $('textarea[data-q="' + q.save + '"]'); if (ta) ta.value = W[q.save];
+    const b = $('[data-save="' + id + '"]'); if (b) { b.disabled = true; b.textContent = 'Saved ✓'; }
+    refreshWork(); updateBrief();
+    const title = QS.find((x) => x.id === q.save).title;
+    toast('Saved to ' + title + ' in your worksheet.');
+  }
+
   /* ---------------- brief generators ---------------- */
   function caseFacts() {
     const c = ind().clients[S.i.client];
@@ -433,6 +518,11 @@
     if (f.m.twist) { L.push(''); L.push('THE TWIST'); L.push(strip(text('twist')) + '.'); }
     const idea = sentenceText(false);
     if (idea) { L.push(''); L.push('OUR IDEA'); L.push(idea); }
+    const facts = ivFacts();
+    if (facts.length) {
+      L.push(''); L.push('WHAT THE CLIENT TOLD US IN THE INTERVIEW');
+      facts.forEach((x) => { L.push('Q: ' + x.q); L.push('A: ' + x.a); });
+    }
     const notes = worksheetNotes();
     if (notes.length) { L.push(''); L.push('NOTES FROM OUR WORKSHEET'); notes.forEach((n) => { L.push(n); L.push(''); }); L.pop(); }
     L.push('');
@@ -520,6 +610,11 @@
       L.push(v ? v : '(not answered yet)');
       L.push('');
     });
+    const facts = ivFacts();
+    if (facts.length) {
+      L.push('## Client interview');
+      facts.forEach((x) => { L.push('Q: ' + x.q); L.push('A: ' + x.a); L.push(''); });
+    }
     L.push('## One sentence');
     L.push(sentenceText(true));
     return L.join('\n');
@@ -679,6 +774,10 @@
     $('#breakSeal').addEventListener('click', () => openCurve(false));
     $('#copyCurve').addEventListener('click', () => copyText('New requirement from the client: ' + D.curveballs[S.i.curve], 'Copied. Paste it into Claude Code.'));
 
+    // interview
+    $('#ivChips').addEventListener('click', (e) => { const b = e.target.closest('[data-iv]'); if (b && !b.disabled) askClient(b.dataset.iv); });
+    $('#ivLog').addEventListener('click', (e) => { const b = e.target.closest('[data-save]'); if (b && !b.disabled) saveAnswer(b.dataset.save); });
+
     // worksheet
     $('#qgrid').addEventListener('input', (e) => {
       const q = e.target.dataset.q; if (!q) return;
@@ -759,7 +858,7 @@
     const shared = location.hash.length > 3 ? decode(location.hash) : null;
     if (shared) {
       S = shared; showSections(); setModeUI(); buildReels();
-      loadW(); renderMemo(true); renderEnvelope(); renderWork(); updateBrief();
+      loadW(); renderMemo(true); renderEnvelope(); renderInterview(); renderWork(); updateBrief();
       $('#caseNo').textContent = 'CASE #' + caseNumber();
       setTimeout(() => $('#caseSection').scrollIntoView(), 50);
     }

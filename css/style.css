@@ -194,6 +194,28 @@ kbd { font-family: var(--mono); font-size: 11px; background: var(--paper); borde
 .envelope.open { background: var(--mint); animation: flash .8s ease; }
 @keyframes flash { 0%, 40% { background: var(--coral); transform: scale(1.02); } 100% { transform: none; } }
 
+/* ---------- client interview ---------- */
+.interview { margin-top: 28px; background: var(--sky); border: var(--bd); border-radius: var(--r); box-shadow: var(--shadow); padding: clamp(16px, 3vw, 26px); }
+.iv-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; justify-content: space-between; }
+.interview h3 { font-size: clamp(26px, 3.4vw, 36px); margin-top: 2px; }
+.interview .sub { color: var(--ink); }
+.iv-left { font-family: var(--mono); font-weight: 800; font-size: 13px; background: var(--ink); color: var(--maize); border-radius: 999px; padding: 5px 14px; white-space: nowrap; }
+.iv-chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+.iv-chips .role { background: #fff; font-size: 15px; padding: 8px 14px; }
+.iv-chips .role[aria-pressed="true"] { background: var(--ink); color: var(--maize); }
+.iv-chips .role:disabled:not([aria-pressed="true"]) { opacity: .4; }
+.iv-log { display: grid; gap: 14px; }
+.iv-row { display: flex; gap: 10px; animation: fadeup .35s ease both; }
+.iv-row.you { justify-content: flex-end; }
+.iv-av { flex: none; width: 38px; height: 38px; border-radius: 50%; border: var(--bd); background: var(--coral); color: #fff; font-weight: 800; display: grid; place-items: center; font-size: 14px; }
+.iv-bub { max-width: min(640px, 100%); background: #fff; border: var(--bd); border-radius: 14px 14px 14px 4px; padding: 10px 14px; box-shadow: var(--shadow-sm); }
+.iv-row.you .iv-bub { background: var(--maize); border-radius: 14px 14px 4px 14px; font-weight: 700; }
+.iv-who { font-family: var(--mono); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 2px; }
+.iv-bub .btn { margin-top: 8px; }
+.iv-bub .btn:disabled { opacity: .6; cursor: default; box-shadow: none; transform: none; }
+.iv-dots::after { content: "..."; animation: dots 1s steps(4) infinite; display: inline-block; width: 1.4em; text-align: left; }
+@keyframes dots { 0% { width: 0; } 100% { width: 1.4em; } }
+
 /* ---------- worksheet ---------- */
 .team { display: grid; gap: 4px; min-width: 260px; }
 .team label { font-family: var(--mono); font-weight: 800; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
@@ -258,6 +280,11 @@ input[type="text"]:focus, textarea:focus { outline: 3px solid var(--maize); outl
 .finale p { max-width: 50ch; }
 .finale-actions { display: flex; gap: 12px; flex-wrap: wrap; }
 
+.credit { margin-top: 22px; display: grid; gap: 12px; justify-items: center; }
+.credit-by { color: var(--ink); font-family: var(--display); font-size: 22px; }
+.credit-links { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.credit-links a { font-weight: 800; font-size: 14px; color: var(--ink); text-decoration: none; background: var(--maize); border: 2px solid var(--ink); border-radius: 999px; padding: 6px 16px; box-shadow: 2px 2px 0 var(--ink); }
+.credit-links a:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--ink); }
 .foot { text-align: center; padding: 70px 20px 150px; color: var(--ink-soft); font-size: 14px; display: grid; gap: 6px; }
 
 /* ---------- clock ---------- */

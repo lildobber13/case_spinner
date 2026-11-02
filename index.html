@@ -86,6 +86,19 @@
         <button class="btn small ghost" id="copyCurve" hidden>Copy for Claude</button>
       </div>
     </div>
+
+    <section class="interview" id="interview" aria-label="Interview the client">
+      <div class="iv-head">
+        <div>
+          <p class="eyebrow">Ask before you build</p>
+          <h3>Interview the client</h3>
+          <p class="sub" id="ivSub"></p>
+        </div>
+        <span class="iv-left" id="ivLeft"></span>
+      </div>
+      <div class="iv-chips" id="ivChips"></div>
+      <div class="iv-log" id="ivLog" aria-live="polite"></div>
+    </section>
   </section>
 
   <!-- ============ 2. WORK THE CASE ============ -->
@@ -94,7 +107,7 @@
       <div>
         <p class="eyebrow">Step 2</p>
         <h2>Work the case</h2>
-        <p class="sub">Six questions turn a fuzzy idea into a buildable solution. Rough answers are fine. Everything saves in your browser.</p>
+        <p class="sub">Six questions turn a fuzzy idea into a buildable solution. The client is fictional, so nobody has the "real" answer: interview them, then make reasonable assumptions and write them down. Everything saves in your browser.</p>
       </div>
       <div class="team">
         <label for="teamName">Team name</label>
@@ -179,6 +192,14 @@
 <footer class="foot">
   <p>All clients, people, and data in this tool are fictional. Build with invented sample data only.</p>
   <p>Edit <code>js/data.js</code> to add your own industries, problems, and twists.</p>
+  <div class="credit">
+    <p class="credit-by">Designed by <b>Zach Gilbert</b></p>
+    <nav class="credit-links" aria-label="Zach Gilbert links">
+      <a href="https://www.linkedin.com/in/zachgilbert13" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      <a href="https://github.com/lildobber13/" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://zachofalltrade.com/" target="_blank" rel="noopener noreferrer">Portfolio</a>
+    </nav>
+  </div>
 </footer>
 
 <!-- ============ SPRINT CLOCK ============ -->
@@ -202,6 +223,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="js/data.js"></script>
+<script src="js/interview.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
