@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Case Spinner</title>
+<meta name="description" content="Spin a random client, a random problem, and solve it with AI. A consulting-style hackathon kickoff tool.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23FFCB05'/%3E%3Ctext x='50' y='70' font-size='64' text-anchor='middle'%3E%F0%9F%8E%B2%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="top">
+  <a class="brand" href="#top" aria-label="AI Case Spinner home">case<b>spinner</b></a>
+  <nav class="steps" aria-label="Sections">
+    <a href="#caseSection" data-nav="case"><i>1</i> Spin</a>
+    <a href="#work" data-nav="work"><i>2</i> Work the case</a>
+    <a href="#brief" data-nav="brief"><i>3</i> Build brief</a>
+  </nav>
+  <button class="chip-btn" id="soundBtn" aria-pressed="false" title="Toggle sound effects">Sound: off</button>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <p class="eyebrow">AI consulting sprint</p>
+    <h1>Get a client.<br>Get a problem.<br><mark>Fix it with AI.</mark></h1>
+    <p class="lede">
+      You're the consultants. Spin up a random industry, a client with a headache, and a few
+      awkward constraints. Then turn it into a build brief and ship a working prototype with Claude Code.
+      No API keys. No installs. Your solution opens in a browser.
+    </p>
+    <div class="hero-cta">
+      <button class="btn big" id="takeCase">Take the case <span aria-hidden="true">&rarr;</span></button>
+      <a class="btn ghost" href="#how">How it works</a>
+    </div>
+    <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marquee"></div></div>
+  </section>
+
+  <section class="how" id="how">
+    <ol class="how-grid">
+      <li><span class="n">1</span><h3>Spin</h3><p>Get a fictional client, a user, a problem, a constraint, and a twist.</p></li>
+      <li><span class="n">2</span><h3>Work the case</h3><p>Answer six consultant questions. Say your idea in one sentence.</p></li>
+      <li><span class="n">3</span><h3>Get your brief</h3><p>We assemble a kickoff prompt and a CLAUDE.md for Claude Code.</p></li>
+      <li><span class="n">4</span><h3>Build &amp; pitch</h3><p>Race the clock, survive the curveball, then show it off.</p></li>
+    </ol>
+  </section>
+
+  <!-- ============ 1. THE CASE ============ -->
+  <section class="case" id="caseSection" hidden>
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Step 1</p>
+        <h2>Your case file</h2>
+      </div>
+      <div class="controls">
+        <div class="seg" role="radiogroup" aria-label="Difficulty">
+          <button role="radio" data-mode="0" aria-checked="false" title="1 constraint, no twist, you choose the AI role">Warm-up</button>
+          <button role="radio" data-mode="1" aria-checked="true"  title="1 constraint, a twist, you choose the AI role">Consultant</button>
+          <button role="radio" data-mode="2" aria-checked="false" title="2 constraints, a twist, and the AI role is assigned">Chaos</button>
+        </div>
+        <button class="btn" id="spinAll">Spin all <kbd>space</kbd></button>
+      </div>
+    </div>
+
+    <div class="case-meta">
+      <span class="case-no" id="caseNo">CASE #0000</span>
+      <span class="stamp" id="stamp">FICTIONAL CLIENT</span>
+    </div>
+
+    <div class="reels" id="reels" aria-live="polite"></div>
+
+    <article class="memo" id="memo" aria-label="Message from the client"></article>
+
+    <div class="envelope" id="envelope">
+      <div class="env-left">
+        <span class="env-icon" aria-hidden="true">&#9993;</span>
+        <div>
+          <h3 id="envTitle">Sealed curveball</h3>
+          <p id="envText">Opens automatically halfway through the 45-minute build timer. Or break the seal early if you're feeling brave.</p>
+        </div>
+      </div>
+      <div class="env-actions">
+        <button class="btn small" id="breakSeal">Break the seal</button>
+        <button class="btn small ghost" id="copyCurve" hidden>Copy for Claude</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. WORK THE CASE ============ -->
+  <section class="work" id="work" hidden>
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Step 2</p>
+        <h2>Work the case</h2>
+        <p class="sub">Six questions turn a fuzzy idea into a buildable solution. Rough answers are fine. Everything saves in your browser.</p>
+      </div>
+      <div class="team">
+        <label for="teamName">Team name</label>
+        <div class="team-row">
+          <input id="teamName" type="text" maxlength="32" placeholder="Name your team" autocomplete="off">
+          <button class="chip-btn" id="teamRoll" title="Random team name">Random</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress" aria-label="Progress">
+      <div class="bar"><span id="progFill"></span></div>
+      <span id="progText">0 of 6 answered</span>
+    </div>
+
+    <div class="qgrid" id="qgrid"></div>
+
+    <div class="sentence">
+      <div class="sentence-head">
+        <p class="eyebrow">Say it in one sentence</p>
+        <p class="sub">If you can't say it clearly, Claude Code will have to guess.</p>
+      </div>
+      <div class="sentence-fields">
+        <label>Solution name
+          <input id="sName" type="text" maxlength="60" placeholder="e.g. a request-routing assistant">
+        </label>
+        <label>Goal for the user
+          <input id="sGoal" type="text" maxlength="90" placeholder="e.g. get the right repair scheduled fast">
+        </label>
+        <label>Outcome we'll improve
+          <input id="sOutcome" type="text" maxlength="90" placeholder="from the case, or write your own">
+        </label>
+      </div>
+      <p class="sentence-out" id="sOut"></p>
+    </div>
+  </section>
+
+  <!-- ============ 3. BUILD BRIEF ============ -->
+  <section class="brief" id="brief" hidden>
+    <div class="sec-head">
+      <div>
+        <p class="eyebrow">Step 3</p>
+        <h2>Your build brief</h2>
+        <p class="sub">It updates as you answer questions. Paste it into Claude Code, or tweak it first.</p>
+      </div>
+    </div>
+
+    <ol class="launch">
+      <li><b>Make an empty folder</b> for your project.</li>
+      <li><b>Save CLAUDE.md</b> into it (download below).</li>
+      <li><b>Open Claude Code</b> in that folder and paste the kickoff prompt.</li>
+      <li><b>Answer its questions</b>, approve the plan, and build one small step at a time.</li>
+    </ol>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true"  data-tab="kickoff">Kickoff prompt</button>
+      <button role="tab" aria-selected="false" data-tab="claudemd">CLAUDE.md</button>
+      <button role="tab" aria-selected="false" data-tab="full">Full case brief</button>
+    </div>
+    <div class="editor">
+      <textarea id="briefText" spellcheck="false" aria-label="Generated brief"></textarea>
+      <div class="editor-actions">
+        <button class="btn" id="copyBrief">Copy</button>
+        <button class="btn ghost" id="dlBrief">Download</button>
+        <span class="hint" id="briefHint"></span>
+      </div>
+    </div>
+
+    <div class="finale">
+      <div>
+        <h3>Share-out time?</h3>
+        <p>Make a pitch card for your team to show on screen, and a link so anyone can open the same case.</p>
+      </div>
+      <div class="finale-actions">
+        <button class="btn" id="pitchBtn">Download pitch card</button>
+        <button class="btn ghost" id="shareBtn">Copy case link</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>All clients, people, and data in this tool are fictional. Build with invented sample data only.</p>
+  <p>Edit <code>js/data.js</code> to add your own industries, problems, and twists.</p>
+</footer>
+
+<!-- ============ SPRINT CLOCK ============ -->
+<aside class="clock" id="clock" aria-label="Sprint clock">
+  <div class="clock-top">
+    <span class="clock-label" id="clockLabel">Sprint clock</span>
+    <button class="x" id="clockMin" aria-label="Collapse clock" title="Collapse">&minus;</button>
+  </div>
+  <div class="clock-time" id="clockTime" role="timer" aria-live="off">45:00</div>
+  <div class="clock-presets">
+    <button data-min="10">Define 10</button>
+    <button data-min="45" class="on">Build 45</button>
+    <button data-min="15">Share 15</button>
+  </div>
+  <div class="clock-actions">
+    <button class="btn small" id="clockGo">Start</button>
+    <button class="btn small ghost" id="clockReset">Reset</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
