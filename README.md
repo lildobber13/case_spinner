@@ -1,6 +1,6 @@
 # AI Case Spinner
 
-A consulting-style kickoff tool for AI hackathons. Spin a random industry, a fictional client, a problem, constraints, and a twist. Work through six consultant questions, then get a ready-to-paste kickoff prompt and `CLAUDE.md` for Claude Code.
+A consulting-style kickoff tool for AI hackathons. Spin a random industry, a fictional client, a problem, constraints, and a twist. Work through six consultant questions, then get a ready-to-paste kickoff prompt and `AGENTS.md` project rules file for any AI coding assistant (Claude Code, Codex, Cursor, Copilot, and so on).
 
 No API keys. No installs. No build step. It is plain HTML, CSS, and JavaScript.
 
@@ -11,7 +11,7 @@ Open the page your facilitator shared, or download this repo and double-click `i
 1. **Spin** for a case. Lock the reels you like, re-roll the ones you don't.
 2. **Interview the client**: ask up to 4 questions (what happens today, what they've tried, tools, sign-off, what a win looks like) and save useful answers to your worksheet.
 3. **Work the case**: answer the six questions and say your idea in one sentence.
-4. **Build brief**: download `CLAUDE.md`, put it in an empty folder, open Claude Code there, and paste the kickoff prompt.
+4. **Build brief**: download `AGENTS.md`, put it in an empty folder, open your AI coding assistant there, and paste the kickoff prompt. (Using Claude Code? Save the rules file as `CLAUDE.md` instead.)
 5. **Race the clock** with the sprint timer. A sealed curveball opens halfway through the 45-minute build.
 6. **Pitch**: download the pitch card for your share-out.
 
@@ -44,11 +44,11 @@ All content lives in `js/data.js`:
 - **globalConstraints**, **twists**, **curveballs**: used across every industry.
 - **aiRoles**: the eight capabilities from the workshop deck.
 
-Copy an industry block, change the text, save, and refresh. The build brief wording is in `js/app.js` (`genKickoff` and `genClaudeMd`).
+Copy an industry block, change the text, save, and refresh. The build brief wording is in `js/app.js` (`genKickoff` and `genRules`).
 
 ## About the "AI" in student projects
 
-Because the goal is that solutions open from a single HTML file with no keys, the generated `CLAUDE.md` tells Claude Code to build a **simulated** AI step: one clearly labelled function that uses sample data and rules, written so a real model call can replace it later. If a team wants real AI calls afterward, they can ask Claude Code how to do it safely.
+Because the goal is that solutions open from a single HTML file with no keys, the generated `AGENTS.md` tells the coding assistant to build a **simulated** AI step: one clearly labelled function that uses sample data and rules, written so a real model call can replace it later. If a team wants real AI calls afterward, they can ask Claude Code how to do it safely.
 
 ## Files
 

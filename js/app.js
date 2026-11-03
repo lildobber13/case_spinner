@@ -549,9 +549,9 @@
   function genKickoff() {
     const f = caseFacts();
     const L = [];
-    L.push('Hi Claude! I’m on a team at a university AI hackathon' + (team ? ' (team: ' + team + ')' : '') + '. We’re playing AI consultants for a fictional client, and we have about 45 minutes to build a working prototype.');
+    L.push('Hi! I’m on a team at a university AI hackathon' + (team ? ' (team: ' + team + ')' : '') + '. We’re playing AI consultants for a fictional client, and we have about 45 minutes to build a working prototype.');
     L.push('');
-    L.push('Please read CLAUDE.md in this folder first. It has the ground rules.');
+    L.push('Please read AGENTS.md in this folder first. It has the ground rules.');
     L.push('');
     L.push('THE CLIENT');
     L.push(f.c.n + ', ' + f.c.d + ' (' + f.industry + ').');
@@ -582,11 +582,11 @@
     L.push('1. Do not write any code yet. Ask me up to four questions to fill important gaps. If you use a question tool, ask them all in one batch of at most four.');
     L.push('2. After I answer, write a short build brief: objective, user workflow, three must-have features, assumptions, and how we will test it.');
     L.push('3. Then propose a plan in plain English with small milestones, and wait for my OK.');
-    L.push('4. Build one milestone at a time. After each one, tell me exactly what to click to test it, and save a backup copy of the working version (see CLAUDE.md).');
+    L.push('4. Build one milestone at a time. After each one, tell me exactly what to click to test it, and save a backup copy of the working version (see AGENTS.md).');
     return L.join('\n');
   }
 
-  function genClaudeMd() {
+  function genRules() {
     const f = caseFacts();
     const L = [];
     L.push('# ' + (team || 'Our team') + ': AI prototype for ' + f.c.n);
@@ -611,7 +611,7 @@
     L.push('- Keep simple backups instead: before a big change, copy the working files into a folder called backups (for example backups/step-2). If I say “roll back”, restore the most recent backup.');
     L.push('- Keep the scope small: aim for three must-have features. Tell me if I’m asking for too much for 45 minutes.');
     L.push('- Never ask me to paste API keys, passwords, or secrets.');
-    L.push('- This folder may start with only CLAUDE.md in it. That is expected, so there is no need to search for other files.');
+    L.push('- This folder may start with only AGENTS.md in it. That is expected, so there is no need to search for other files.');
     L.push('- I might be on Windows or Mac. Prefer your file tools over shell commands, and avoid commands that only work on one system.');
     L.push('');
     L.push('## Technical rules');
@@ -676,8 +676,8 @@
   }
 
   const TABS = {
-    kickoff:  { gen: genKickoff,  file: 'kickoff-prompt.md', hint: 'Paste this into Claude Code after saving CLAUDE.md.' },
-    claudemd: { gen: genClaudeMd, file: 'CLAUDE.md',         hint: 'Save as CLAUDE.md in your project folder. Claude reads it every session.' },
+    kickoff:  { gen: genKickoff,  file: 'kickoff-prompt.md', hint: 'Paste this into your coding assistant after saving AGENTS.md.' },
+    rules:    { gen: genRules,    file: 'AGENTS.md',         hint: 'Save as AGENTS.md in your project folder. Many assistants load it automatically, and the kickoff prompt tells yours to read it anyway. (Using Claude Code? Save it as CLAUDE.md instead.)' },
     full:     { gen: genFull,     file: 'case-brief.md',     hint: 'Your whole case on one page, handy for the share-out.' }
   };
   let briefT;
@@ -827,7 +827,7 @@
     }));
 
     $('#breakSeal').addEventListener('click', () => openCurve(false));
-    $('#copyCurve').addEventListener('click', () => copyText('New requirement from the client: ' + D.curveballs[S.i.curve], 'Copied. Paste it into Claude Code.'));
+    $('#copyCurve').addEventListener('click', () => copyText('New requirement from the client: ' + D.curveballs[S.i.curve], 'Copied. Paste it into your coding assistant.'));
 
     // interview
     $('#ivChips').addEventListener('click', (e) => { const b = e.target.closest('[data-iv]'); if (b && !b.disabled) askClient(b.dataset.iv); });
@@ -873,7 +873,7 @@
     }));
     $('#briefText').addEventListener('input', (e) => { edits[activeTab] = e.target.value; $('#briefHint').innerHTML = 'You edited this. <button class="chip-btn" id="resetEdit">Reset</button>'; });
     $('#briefHint').addEventListener('click', (e) => { if (e.target.id === 'resetEdit') { delete edits[activeTab]; paintBrief(); } });
-    $('#copyBrief').addEventListener('click', () => copyText($('#briefText').value, 'Copied. Paste it into Claude Code.'));
+    $('#copyBrief').addEventListener('click', () => copyText($('#briefText').value, 'Copied. Paste it into your coding assistant.'));
     $('#dlBrief').addEventListener('click', () => { download(TABS[activeTab].file, $('#briefText').value); toast('Saved ' + TABS[activeTab].file); });
     $('#pitchBtn').addEventListener('click', pitchCard);
     $('#shareBtn').addEventListener('click', () => {
